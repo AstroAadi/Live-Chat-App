@@ -1,0 +1,75 @@
+<!-- Add a container div for the background animation -->
+<div class="background-animation"></div>
+
+<!-- If the user is not connected, show the username input page -->
+<div *ngIf="!isConnected" id="username-page">
+  <div class="username-page-container">
+    <h1 class="title">Type your username to join the Chatroom</h1>
+    <form (ngSubmit)="connect()">
+      <div class="form-group">
+        <input [(ngModel)]="username" name="username" type="text" id="name" placeholder="Username" autocomplete="off" class="form-control" />
+      </div>
+      <div class="form-group">
+        <button type="submit" class="accent username-submit">Start Chatting</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- If the user is connected, show the chatroom interface -->
+<div *ngIf="isConnected" class="chat-container">
+  <div class="chat-header">
+    <div class="header-left">
+      <h2>Chat App</h2>
+      <button class="online-users-toggle" (click)="toggleOnlineUsers()">
+        <span class="status-dot"></span>
+        {{ onlineUserCount }} Online
+      </button>
+    </div>
+    <div class="online-status">
+      <span class="status-dot"></span>
+      {{ username }}
+    </div>
+  </div>
+
+  <div class="chat-content">
+    <div class="chat-main">
+      <div class="messages-container" #scrollContainer>
+        <div *ngFor="let message of messages" [ngClass]="{'message-wrapper': true, 'sent': message.sender === username, 'received': message.sender !== username}">
+          <div *ngIf="message.type === 'CHAT'" class="avatar-container">
+            <i [style.backgroundColor]="getAvatarColor(message.sender)">
+              {{ message.sender.charAt(0) }}
+            </i>
+          </div>
+          <div 
+            [ngClass]="{
+              'message': true,
+              'message-sent': message.sender === username,
+              'message-received': message.sender !== username
+            }">
+            <div *ngIf="message.type === 'CHAT'" class="message-sender">{{ message.sender }}</div>
+            <div class="message-content">
+              <span *ngIf="message.type === 'CHAT'">{{ message.content }}</span>
+              <span *ngIf="message.type === 'JOIN'">{{ message.sender }} joined!</span>
+              <span *ngIf="message.type === 'LEAVE'">{{ message.sender }} left!</span>
+            </div>
+            <div *ngIf="message.type === 'CHAT'" class="timestamp">{{ message.timestamp | date:'shortTime' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-container">
+        <input type="text" 
+               [(ngModel)]="message" 
+               (keyup.enter)="sendMessage()"
+               placeholder="Type a message..."
+               class="message-input">
+        <button (click)="sendMessage()" 
+                [disabled]="!message.trim()"
+                class="send-button">
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
